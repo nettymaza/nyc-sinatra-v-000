@@ -1,4 +1,6 @@
 require 'pry'
+require 'awesome_print'
+
 class FiguresController < ApplicationController
 
   get '/' do
@@ -21,21 +23,39 @@ class FiguresController < ApplicationController
     erb :'/figures/show'
   end
 
+  get '/figures/:id/edit' do
+    @figure = Figure.find_by_id(params[:id])
+    erb :'figures/edit'
+  end
 
   post '/figures' do
-    # {figure: {name: 'some name'}}
-    @figure = Figure.create(name: params['figure']['name'])
+    @figure = Figure.create(params[:figure])
 
-    if params["landmark"]["name"]
-      @figure.landmarks << Landmark.create(name: params["landmark"]["name"])
+    if !params['title']['name'].empty?
+      @figure.titles << Title.create(name: params['title']['name'])
     end
 
-    if params['title']['name']
-      @figure.titles << Title.create(params[:title])
+    if !params['landmark']['name'].empty?
+      @figure.landmarks << Landmark.create(name: params['title']['name'])
     end
-    binding.pry
+
     @figure.save
+    redirect "/figures/#{@figure.id}"
+  end
 
+  patch '/figures/:id' do
+    @figure = Figure.find_by_id(params[:id])
+    @figure.update(params[:figure])
+
+    if !params['title']['name'].empty?
+      @figure.titles << Title.create(name: params['title']['name'])
+    end
+
+    if !params['landmark']['name'].empty?
+      @figure.landmarks << Landmark.create(name: params['landmark']['name'])
+    end
+
+    @figure.save
     redirect "/figures/#{@figure.id}"
   end
 end
